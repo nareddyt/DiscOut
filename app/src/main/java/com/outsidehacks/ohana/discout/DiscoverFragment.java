@@ -1,38 +1,35 @@
 package com.outsidehacks.ohana.discout;
 
-import android.animation.Animator;
-import android.content.Context;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.spotify.sdk.android.player.Config;
 import com.squareup.picasso.Picasso;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class DiscoverFragment extends Fragment implements View.OnClickListener {
 
     private boolean isPlaying = false;
+
+    private TextView textView;
 
     private LinearLayout layout;
     private View yesButton;
@@ -73,10 +70,12 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_recommend, container, false);
+        View v = inflater.inflate(R.layout.fragment_discover, container, false);
+
+        textView = (TextView) v.findViewById(R.id.done_text);
+
         yesButton = v.findViewById(R.id.yes_button);
         noButton = v.findViewById(R.id.no_button);
         maybeButton = v.findViewById(R.id.maybe_button);
@@ -143,8 +142,25 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
             }else{
                 playButton.setVisibility(View.VISIBLE);
             }
+            eventImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(eventData.get(index).getEventPage()));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.setPackage("com.android.chrome");
+                    try {
+                        DiscoverFragment.this.startActivity(intent);
+                    } catch (ActivityNotFoundException ex) {
+                        // Chrome browser presumably not installed so allow user to choose instead
+                        intent.setPackage(null);
+                        DiscoverFragment.this.startActivity(intent);
+                    }
+                }
+            });
         }else{
             cardView.setVisibility(View.GONE);
+            textView.setVisibility(View.VISIBLE);
+            textView.setText("No More Suggestions");
         }
         yesButton.setOnClickListener(this);
         noButton.setOnClickListener(this);
@@ -154,7 +170,6 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
 
         return v;
     }
-
 
     @Override
     public void onClick(View view) {
@@ -205,9 +220,26 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                     }else{
                         playButton.setVisibility(View.VISIBLE);
                     }
-
+                    eventImage.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(eventData.get(index).getEventPage()));
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            intent.setPackage("com.android.chrome");
+                            try {
+                                DiscoverFragment.this.startActivity(intent);
+                            } catch (ActivityNotFoundException ex) {
+                                // Chrome browser presumably not installed so allow user to choose instead
+                                intent.setPackage(null);
+                                DiscoverFragment.this.startActivity(intent);
+                            }
+                        }
+                    });
                     cardView.animate().scaleY(1f).scaleX(1f).setStartDelay(1000).setInterpolator(new OvershootInterpolator()).setDuration(300).start();
                     yesButton.setClickable(true);
+                }else{
+                    textView.setVisibility(View.VISIBLE);
+                    textView.setText("No More Suggestions");
                 }
             }
 
