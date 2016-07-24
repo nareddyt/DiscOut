@@ -10,7 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.widget.ContentLoadingProgressBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,9 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
-
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -39,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private static final String CLIENT_ID = "6c6016da831348e18df08257e074c9c4";
 
@@ -61,13 +58,11 @@ public class MainActivity extends AppCompatActivity{
     private String authToken;
     private Map<String, Integer> myGenreMap = new HashMap<>();
     private ProgressBar progressBar;
+    private List<EventData> eventDatasForQueue = new ArrayList<EventData>();
 
     public List<EventData> getEventDatasForQueue() {
         return eventDatasForQueue;
     }
-
-    private List<EventData> eventDatasForQueue = new ArrayList<EventData>();
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -212,7 +207,7 @@ public class MainActivity extends AppCompatActivity{
 
                 List<EventData> eventList = discover.getEvents();
 
-                Map<String, EventData> eventArtistMap = new HashMap<String, EventData>();
+                final Map<String, EventData> eventArtistMap = new HashMap<String, EventData>();
                 for (EventData eventData : eventList) {
                     eventArtistMap.put(eventData.getEventName(), eventData);
                 }
@@ -247,44 +242,58 @@ public class MainActivity extends AppCompatActivity{
 
                 Log.v("Event queue", eventDatasForQueue.toString());
 
-                handler.post(new Runnable() {
+                discover.getArtists(authToken, new Discover.ArtistsAction() {
                     @Override
-                    public void run() {
-                        // Create the adapter that will return a fragment for each of the three
-                        // primary sections of the activity.
-                        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+                    public void execute(List<String> artists) {
+                        Log.v("Playlist Artists", artists.toString());
 
-                        // Set up the ViewPager with the sections adapter.
-                        mViewPager = (ViewPager) findViewById(R.id.container);
-                        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-                        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-                        setSupportActionBar(toolbar);
-
-                        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-                        tabLayout.setupWithViewPager(mViewPager);
-
-                        progressBar.animate().alpha(0).setListener(new Animator.AnimatorListener() {
-                            @Override
-                            public void onAnimationStart(Animator animator) {
-
+                        for (String artist : artists) {
+                            EventData eventData = eventArtistMap.get(artist.toUpperCase());
+                            if (eventData != null && !eventDatasForQueue.contains(eventData)) {
+                                eventDatasForQueue.add(eventData);
                             }
+                        }
 
+                        handler.post(new Runnable() {
                             @Override
-                            public void onAnimationEnd(Animator animator) {
-                                progressBar.setVisibility(View.GONE);
+                            public void run() {
+                                // Create the adapter that will return a fragment for each of the three
+                                // primary sections of the activity.
+                                mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+                                // Set up the ViewPager with the sections adapter.
+                                mViewPager = (ViewPager) findViewById(R.id.container);
+                                mViewPager.setAdapter(mSectionsPagerAdapter);
+
+                                Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                                setSupportActionBar(toolbar);
+
+                                TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+                                tabLayout.setupWithViewPager(mViewPager);
+
+                                progressBar.animate().alpha(0).setListener(new Animator.AnimatorListener() {
+                                    @Override
+                                    public void onAnimationStart(Animator animator) {
+
+                                    }
+
+                                    @Override
+                                    public void onAnimationEnd(Animator animator) {
+                                        progressBar.setVisibility(View.GONE);
+                                    }
+
+                                    @Override
+                                    public void onAnimationCancel(Animator animator) {
+
+                                    }
+
+                                    @Override
+                                    public void onAnimationRepeat(Animator animator) {
+
+                                    }
+                                }).start();
                             }
-
-                            @Override
-                            public void onAnimationCancel(Animator animator) {
-
-                            }
-
-                            @Override
-                            public void onAnimationRepeat(Animator animator) {
-
-                            }
-                        }).start();
+                        });
                     }
                 });
             }

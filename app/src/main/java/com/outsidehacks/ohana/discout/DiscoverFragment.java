@@ -18,7 +18,6 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.squareup.picasso.Picasso;
 import org.greenrobot.eventbus.EventBus;
 
@@ -40,8 +39,10 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
     private ImageView playButton;
     private ImageView eventImage;
     private List<EventData> eventData;
+    private TextView timeTextView;
     private int index;
     private MediaPlayer mp;
+
     public DiscoverFragment() {
         // Required empty public constructor
     }
@@ -65,7 +66,7 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
 
         super.onCreate(savedInstanceState);
         mp = new MediaPlayer();
-        eventData = ((MainActivity)getActivity()).getEventDatasForQueue();
+        eventData = ((MainActivity) getActivity()).getEventDatasForQueue();
         Log.v("Event stuff", eventData.toString());
     }
 
@@ -83,20 +84,22 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
         playButton = (ImageView) v.findViewById(R.id.play_button);
         eventImage = (ImageView) v.findViewById(R.id.event_image);
         cardView = (CardView) v.findViewById(R.id.card_view);
+        timeTextView = (TextView) v.findViewById(R.id.time_text);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isPlaying){
+                if (isPlaying) {
 
                     isPlaying = false;
-                    if (Build.VERSION.SDK_INT >= 21){
-                        playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp, null));
-                    }else{
+                    if (Build.VERSION.SDK_INT >= 21) {
+                        playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp,
+                                null));
+                    } else {
                         playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
                     }
                     mp.stop();
                     mp.reset();
-                }else {
+                } else {
                     EventData d = eventData.get(index);
 
                     try {
@@ -109,22 +112,24 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                                 mediaPlayer.stop();
                                 mediaPlayer.reset();
                                 isPlaying = false;
-                                if (Build.VERSION.SDK_INT >= 21){
-                                    playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp, null));
-                                }else{
-                                    playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
+                                if (Build.VERSION.SDK_INT >= 21) {
+                                    playButton.setImageDrawable(getResources().getDrawable(R.drawable
+                                            .ic_play_arrow_black_24dp, null));
+                                } else {
+                                    playButton.setImageDrawable(getResources().getDrawable(R.drawable
+                                            .ic_play_arrow_black_24dp));
                                 }
                             }
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (Exception exc){
+                    } catch (Exception exc) {
                         playButton.setVisibility(View.INVISIBLE);
                     }
                     mp.start();
-                    if (Build.VERSION.SDK_INT >= 21){
+                    if (Build.VERSION.SDK_INT >= 21) {
                         playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop_black_24dp, null));
-                    }else{
+                    } else {
                         playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop_black_24dp));
                     }
                     isPlaying = true;
@@ -132,20 +137,22 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
 
             }
         });
-        if (!eventData.isEmpty()){
+        if (!eventData.isEmpty()) {
             index = 0;
             EventData event = eventData.get(index);
-            titleView.setText(event.getEventName());
+            titleView.setText(eventData.get(index).getEventName() + "\n" + eventData.get(index).getLocation());
             Picasso.with(getActivity()).load(event.getEventImage()).into(eventImage);
-            if (eventData.get(index).getPreviewUrl().isEmpty()){
+            if (eventData.get(index).getPreviewUrl().isEmpty()) {
                 playButton.setVisibility(View.GONE);
-            }else{
+            } else {
                 playButton.setVisibility(View.VISIBLE);
             }
+            timeTextView.setText("August " + eventData.get(index).getStartTime().substring(0, 1) + "th at " + eventData
+                    .get(index).getStartTime().substring(5) + " - " + eventData.get(index).getEndTime().substring(5));
             eventImage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(eventData.get(index).getEventPage()));
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(eventData.get(index).getEventPage()));
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     intent.setPackage("com.android.chrome");
                     try {
@@ -157,7 +164,7 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                     }
                 }
             });
-        }else{
+        } else {
             cardView.setVisibility(View.GONE);
             textView.setVisibility(View.VISIBLE);
             textView.setText("No More Suggestions");
@@ -167,7 +174,6 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
         maybeButton.setOnClickListener(this);
 
 
-
         return v;
     }
 
@@ -175,24 +181,24 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         final int id = view.getId();
         yesButton.setClickable(false);
-        if (id == R.id.yes_button){
+        if (id == R.id.yes_button) {
 
             EventData currEvent = eventData.get(index);
             eventData.remove(index);
 
             EventBus.getDefault().post(currEvent);
 
-        }else if( id == R.id.no_button){
+        } else if (id == R.id.no_button) {
             eventData.remove(index);
-        }else if ( id == R.id.maybe_button){
+        } else if (id == R.id.maybe_button) {
             index++;
         }
         mp.stop();
         mp.reset();
         isPlaying = false;
-        if (Build.VERSION.SDK_INT >= 21){
+        if (Build.VERSION.SDK_INT >= 21) {
             playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp, null));
-        }else{
+        } else {
             playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
         }
         Animation slideAnim = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_down);
@@ -206,24 +212,30 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
             public void onAnimationEnd(Animation animation) {
                 cardView.setVisibility(View.GONE);
 //                    // Process discovery
-                if ((index) >= eventData.size()){
+                if ((index) >= eventData.size()) {
                     index = 0;
                 }
                 if (index < eventData.size()) {
                     cardView.setVisibility(View.VISIBLE);
                     cardView.setScaleX(0);
                     cardView.setScaleY(0);
-                    titleView.setText(eventData.get(index).getEventName());
+                    titleView.setText(eventData.get(index).getEventName() + "\n" + eventData.get(index).getLocation());
+                    timeTextView.setText("August " + eventData.get(index).getStartTime().substring(0, 1) + "th at " +
+                            eventData
+                            .get(index).getStartTime().substring(5) + " - " + eventData.get(index).getEndTime()
+                            .substring(5));
                     Picasso.with(getActivity()).load(eventData.get(index).getEventImage()).into(eventImage);
-                    if (eventData.get(index).getPreviewUrl().isEmpty()){
+
+                    if (eventData.get(index).getPreviewUrl().isEmpty()) {
                         playButton.setVisibility(View.GONE);
-                    }else{
+                    } else {
                         playButton.setVisibility(View.VISIBLE);
                     }
                     eventImage.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Intent intent=new Intent(Intent.ACTION_VIEW,Uri.parse(eventData.get(index).getEventPage()));
+                            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(eventData.get(index)
+                                    .getEventPage()));
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             intent.setPackage("com.android.chrome");
                             try {
@@ -235,9 +247,10 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                             }
                         }
                     });
-                    cardView.animate().scaleY(1f).scaleX(1f).setStartDelay(1000).setInterpolator(new OvershootInterpolator()).setDuration(300).start();
+                    cardView.animate().scaleY(1f).scaleX(1f).setStartDelay(1000).setInterpolator(new
+                            OvershootInterpolator()).setDuration(300).start();
                     yesButton.setClickable(true);
-                }else{
+                } else {
                     textView.setVisibility(View.VISIBLE);
                     textView.setText("No More Suggestions");
                 }

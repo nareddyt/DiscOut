@@ -10,7 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,37 +25,49 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.ResponseBody;
-import okio.BufferedSource;
 
 /**
  * Created by jerry on 7/23/16.
  */
 public class Discover {
 
-    abstract class ArtistsAction {
-        abstract public void execute(List<String> artists);
-    }
-
     private static String[] locations = {"Panhandle", "Lands End", "The Barbary", "Sutro"
             , "Twin Peaks", "The House by Heineken"};
-    private List<EventData> events;
-
     private final OkHttpClient client = new OkHttpClient();
-
     private final JsonParser parser = new JsonParser();
+    private List<EventData> events;
+    private Map<String, List<String>> genreMap = new HashMap<>();
+    private Context context;
+
+    public Discover(Context context) {
+        this.context = context;
+        events = readEvents();
+    }
+
+    public void getArtists(String authToken, ArtistsAction onDone) throws IOException {
+        String playlistUrl = "https://api.spotify.com/v1/me/playlists";
+        String json = getRequestSync(playlistUrl, authToken);
+        JsonArray playlists = parser.parse(json).getAsJsonObject().get("items").getAsJsonArray();
+        List<String> artists = new ArrayList<>();
+        AtomicInteger numLeft = new AtomicInteger(playlists.size());
+        for (JsonElement e : playlists) {
+            String playlistId = e.getAsJsonObject().get("id").getAsString();
+            Log.v("Playlist id", playlistId);
+            String userId = getUserId(authToken);
+            getArtistsInPlaylist(artists, numLeft, userId, playlistId, authToken, onDone);
+        }
+    }
+
+    public List<EventData> getEvents() {
+        return events;
+    }
+
+    public Map<String, List<String>> getGenreMap() {
+        return genreMap;
+    }
 
     public void getRequest(String url, String authToken, Callback callback) {
         final Request request = new Request.Builder()
@@ -70,67 +86,11 @@ public class Discover {
         return response.body().string();
     }
 
-    private void getArtistsInPlaylist(final List<String> artists, final AtomicInteger numLeft, String userId, String playlistId, String authToken, final ArtistsAction onDone) {
-        String playlistTracksUrl = "https://api.spotify.com/v1/users/" + userId + "/playlists/" + playlistId + "/tracks";
-        getRequest(playlistTracksUrl, authToken, new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                String json = response.body().string();
-                JsonArray tracks = parser.parse(json).getAsJsonObject().get("items").getAsJsonArray();
-                for (JsonElement e: tracks) {
-                    JsonObject track = e.getAsJsonObject();
-                    String artist = track.get("artists").getAsJsonArray().get(0).getAsJsonObject().get("name").getAsString();
-                    if (!artists.contains(artist)) {
-                        artists.add(artist);
-                    }
-                }
-                Integer left = numLeft.decrementAndGet();
-                if (left.equals(0)) {
-                    onDone.execute(artists);
-                }
-            }
-        });
-    }
-
-    public void getArtists(String authToken, ArtistsAction onDone) throws IOException {
-        String playlistUrl = "https://api.spotify.com/v1/me/playlists";
-        String json = getRequestSync(playlistUrl, authToken);
-        JsonArray playlists = parser.parse(json).getAsJsonObject().get("items").getAsJsonArray();
-        List<String> artists = new ArrayList<>();
-        AtomicInteger numLeft = new AtomicInteger(playlists.size());
-        for (JsonElement e: playlists) {
-            String playlistId = e.getAsJsonObject().get("snapshot_id").getAsString();
-            String userId = getUserId(authToken);
-            getArtistsInPlaylist(artists, numLeft, userId, playlistId, authToken, onDone);
-        }
-    }
-
     public String getUserId(String authToken) throws IOException {
         String userIdUrl = "https://api.spotify.com/v1/me";
         String response = getRequestSync(userIdUrl, authToken);
         JsonObject json = parser.parse(response).getAsJsonObject();
         return json.get("id").getAsString();
-    }
-
-    public Map<String, List<String>> getGenreMap() {
-        return genreMap;
-    }
-
-    private Map<String, List<String>> genreMap = new HashMap<>();
-    private Context context;
-
-    public Discover(Context context) {
-        this.context = context;
-        events = readEvents();
-    }
-
-    public List<EventData> getEvents() {
-        return events;
     }
 
     public List<EventData> readEvents() {
@@ -174,5 +134,42 @@ public class Discover {
             e.printStackTrace();
         }
         return results;
+    }
+
+    private void getArtistsInPlaylist(final List<String> artists, final AtomicInteger numLeft, String userId, String
+            playlistId, String authToken, final ArtistsAction onDone) {
+        String playlistTracksUrl = "https://api.spotify.com/v1/users/" + userId + "/playlists/" + playlistId +
+                "/tracks";
+        getRequest(playlistTracksUrl, authToken, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String json = response.body().string();
+                Log.v("Json", json);
+                Log.v("Json Object", parser.parse(json).getAsJsonObject().toString());
+                JsonArray tracks = parser.parse(json).getAsJsonObject().get("items").getAsJsonArray();
+                for (JsonElement e : tracks) {
+                    JsonObject track = e.getAsJsonObject();
+                    Log.v("Track", track.toString());
+                    String artist = track.get("track").getAsJsonObject().get("artists").getAsJsonArray().get(0)
+                            .getAsJsonObject().get("name").getAsString();
+                    if (!artists.contains(artist)) {
+                        artists.add(artist);
+                    }
+                }
+                Integer left = numLeft.decrementAndGet();
+                if (left.equals(0)) {
+                    onDone.execute(artists);
+                }
+            }
+        });
+    }
+
+    static abstract class ArtistsAction {
+        abstract public void execute(List<String> artists);
     }
 }

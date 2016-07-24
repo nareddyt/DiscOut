@@ -1,1 +1,122 @@
-{"rock": ["THIRD EYE BLIND", "DURAN DURAN"], "metropopolis": ["GRIMES"], "christmas": ["SUFJAN STEVENS", "ROGUE WAVE"], "r&b": ["GRIMES"], "wonky": ["TOKIMONSTA"], "complextro": ["ZEDD"], "wave": ["GRIMES", "DURAN DURAN"], "edm": ["ZEDD"], "rave": ["LCD SOUNDSYSTEM"], "hop": ["J. COLE"], "electro": ["ZEDD"], "indietronica": ["MIIKE SNOW", "LCD SOUNDSYSTEM"], "house": ["ZEDD"], "hip": ["J. COLE"], "indie": ["SUFJAN STEVENS", "SUFJAN STEVENS", "SUFJAN STEVENS", "RA RA RIOT", "ROGUE WAVE", "ROGUE WAVE", "GRIMES"], "grave": ["GRIMES"], "chamber": ["SUFJAN STEVENS"], "romantic": ["DURAN DURAN"], "and": ["LORD HURON"], "alternative": ["JASON ISBELL", "LCD SOUNDSYSTEM", "J. COLE"], "electroclash": ["PEACHES"], "country": ["JASON ISBELL"], "pop": ["SUFJAN STEVENS", "SUFJAN STEVENS", "THIRD EYE BLIND", "RA RA RIOT", "ROGUE WAVE", "ROGUE WAVE", "ST. LUCIA"], "flutter": ["LORD HURON"], "stomp": ["LORD HURON", "ROGUE WAVE"], "dance-punk": ["LCD SOUNDSYSTEM", "FOALS"], "new": ["LCD SOUNDSYSTEM", "DURAN DURAN", "DURAN DURAN"], "shimmer": ["ST. LUCIA"], "folk": ["GRIZ", "SUFJAN STEVENS"], "dance": ["LCD SOUNDSYSTEM", "DURAN DURAN"], "freak": ["GRIZ"], "chillwave": ["GRIMES"]}
+{
+  "rock": [
+    "THIRD EYE BLIND",
+    "DURAN DURAN"
+  ],
+  "metropopolis": [
+    "GRIMES"
+  ],
+  "christmas": [
+    "SUFJAN STEVENS",
+    "ROGUE WAVE"
+  ],
+  "r&b": [
+    "GRIMES"
+  ],
+  "wonky": [
+    "TOKIMONSTA"
+  ],
+  "complextro": [
+    "ZEDD"
+  ],
+  "wave": [
+    "GRIMES",
+    "DURAN DURAN"
+  ],
+  "edm": [
+    "ZEDD"
+  ],
+  "rave": [
+    "LCD SOUNDSYSTEM"
+  ],
+  "hop": [
+    "J. COLE"
+  ],
+  "electro": [
+    "ZEDD"
+  ],
+  "indietronica": [
+    "MIIKE SNOW",
+    "LCD SOUNDSYSTEM"
+  ],
+  "house": [
+    "ZEDD"
+  ],
+  "hip": [
+    "J. COLE"
+  ],
+  "indie": [
+    "SUFJAN STEVENS",
+    "SUFJAN STEVENS",
+    "SUFJAN STEVENS",
+    "RA RA RIOT",
+    "ROGUE WAVE",
+    "ROGUE WAVE",
+    "GRIMES"
+  ],
+  "grave": [
+    "GRIMES"
+  ],
+  "chamber": [
+    "SUFJAN STEVENS"
+  ],
+  "romantic": [
+    "DURAN DURAN"
+  ],
+  "and": [
+    "LORD HURON"
+  ],
+  "alternative": [
+    "JASON ISBELL",
+    "LCD SOUNDSYSTEM",
+    "J. COLE"
+  ],
+  "electroclash": [
+    "PEACHES"
+  ],
+  "country": [
+    "JASON ISBELL"
+  ],
+  "pop": [
+    "SUFJAN STEVENS",
+    "SUFJAN STEVENS",
+    "THIRD EYE BLIND",
+    "RA RA RIOT",
+    "ROGUE WAVE",
+    "ROGUE WAVE",
+    "ST. LUCIA"
+  ],
+  "flutter": [
+    "LORD HURON"
+  ],
+  "stomp": [
+    "LORD HURON",
+    "ROGUE WAVE"
+  ],
+  "dance-punk": [
+    "LCD SOUNDSYSTEM",
+    "FOALS"
+  ],
+  "new": [
+    "LCD SOUNDSYSTEM",
+    "DURAN DURAN",
+    "DURAN DURAN"
+  ],
+  "shimmer": [
+    "ST. LUCIA"
+  ],
+  "folk": [
+    "GRIZ",
+    "SUFJAN STEVENS"
+  ],
+  "dance": [
+    "LCD SOUNDSYSTEM",
+    "DURAN DURAN"
+  ],
+  "freak": [
+    "GRIZ"
+  ],
+  "chillwave": [
+    "GRIMES"
+  ]
+}

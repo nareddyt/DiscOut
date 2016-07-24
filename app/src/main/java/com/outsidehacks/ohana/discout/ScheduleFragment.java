@@ -17,7 +17,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -141,12 +140,6 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         return view;
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventAdded(EventData eventData) {
-        this.addEvent(eventData.getEventName(), eventData.getLocation(), eventData.getStartTime(), eventData
-                .getEndTime());
-    }
-
     @Override
     public void onDetach() {
         super.onDetach();
@@ -170,6 +163,12 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
 
     @Override
     public void onScrollToDate(Calendar calendar) {
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventAdded(EventData eventData) {
+        this.addEvent(eventData.getEventName(), eventData.getLocation(), eventData.getStartTime(), eventData
+                .getEndTime());
     }
 
     /**
