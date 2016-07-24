@@ -9,6 +9,24 @@ public class EventData {
     private String startTime;
     private String endTime;
     private String location;
+    private String previewUrl;
+
+    public String getPreviewUrl() {
+        return previewUrl;
+    }
+
+    public void setPreviewUrl(String previewUrl) {
+        this.previewUrl = previewUrl;
+    }
+
+    public EventData(String eventName, String eventPage, String startTime, String endTime, String location, String previewUrl) {
+        this.eventName = eventName;
+        this.eventPage = eventPage;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.location = location;
+        this.previewUrl = previewUrl;
+    }
 
     public String getEndTime() {
         return endTime;

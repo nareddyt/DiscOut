@@ -2,7 +2,9 @@ package com.outsidehacks.ohana.discout;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +16,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.player.Config;
+import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Player;
+import com.spotify.sdk.android.player.PlayerNotificationCallback;
+import com.spotify.sdk.android.player.PlayerState;
+import com.spotify.sdk.android.player.Spotify;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
@@ -27,7 +36,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
+
+    private static final String CLIENT_ID = "6c6016da831348e18df08257e074c9c4";
+
 
     private final OkHttpClient client = new OkHttpClient();
     /**
@@ -47,6 +59,8 @@ public class MainActivity extends AppCompatActivity {
     private String authToken;
 
     private Map<String, Integer> genreMap = new HashMap<>();
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -73,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -104,11 +119,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                return DiscoverFragment.newInstance();
+                Bundle args = new Bundle();
+                args.putString("token", getIntent().getStringExtra("AUTH_TOKEN"));
+                DiscoverFragment fragment = DiscoverFragment.newInstance();
+                fragment.setArguments(args);
+                return fragment;
             } else {
                 return ScheduleFragment.newInstance();
             }
         }
+
     }
 
     @Override
