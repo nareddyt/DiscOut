@@ -1,15 +1,27 @@
 package com.outsidehacks.ohana.discout;
 
+import android.animation.Animator;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
-public class DiscoverFragment extends Fragment {
-    private OnFragmentInteractionListener mListener;
+public class DiscoverFragment extends Fragment implements View.OnClickListener {
+
+    private LinearLayout layout;
+    private View yesButton;
+    private View noButton;
+    private View maybeButton;
+    private CardView cardView;
 
     public DiscoverFragment() {
         // Required empty public constructor
@@ -30,14 +42,6 @@ public class DiscoverFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        }
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -46,34 +50,53 @@ public class DiscoverFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recommend, container, false);
+        View v = inflater.inflate(R.layout.fragment_recommend, container, false);
+        yesButton = v.findViewById(R.id.yes_button);
+        noButton = v.findViewById(R.id.no_button);
+        maybeButton = v.findViewById(R.id.maybe_button);
+        yesButton.setOnClickListener(this);
+        noButton.setOnClickListener(this);
+        maybeButton.setOnClickListener(this);
+        cardView = (CardView) v.findViewById(R.id.card_view);
+        return v;
     }
+
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.yes_button){
+            cardView.setVisibility(View.GONE);
+//            cardView.animate().scaleX(0).scaleY(0).setDuration(300).setInterpolator(new AccelerateInterpolator()).setListener(new Animator.AnimatorListener() {
+//                @Override
+//                public void onAnimationStart(Animator animator) {
+//                    yesButton.setClickable(false);
+//                }
+//
+//                @Override
+//                public void onAnimationEnd(Animator animator) {
+//                    cardView.setVisibility(View.GONE);
+//                    // Process discovery
+//
+//                    cardView.setVisibility(View.VISIBLE);
+//                    cardView.animate().scaleY(1f).scaleX(1f).setStartDelay(1000).setInterpolator(new OvershootInterpolator()).setDuration(250).start();
+//                    yesButton.setClickable(true);
+//                }
+//
+//                @Override
+//                public void onAnimationCancel(Animator animator) {
+//
+//                }
+//
+//                @Override
+//                public void onAnimationRepeat(Animator animator) {
+//
+//                }
+//            }).start();
+        }else if( id == R.id.no_button){
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
+        }else if ( id == R.id.maybe_button){
+
         }
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }

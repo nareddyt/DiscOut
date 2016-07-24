@@ -1,5 +1,6 @@
 package com.outsidehacks.ohana.discout;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -115,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        final Context context = this;
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -183,7 +186,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 Log.v("Genres Map", genreMap.toString());
-                Discover discover = new Discover();
+                Discover discover = new Discover(context);
                 discover.getEvents();
             }
         });
