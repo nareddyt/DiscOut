@@ -4,9 +4,21 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import com.github.tibolte.agendacalendarview.AgendaCalendarView;
+import com.github.tibolte.agendacalendarview.CalendarPickerController;
+import com.github.tibolte.agendacalendarview.models.BaseCalendarEvent;
+import com.github.tibolte.agendacalendarview.models.CalendarEvent;
+import com.github.tibolte.agendacalendarview.models.DayItem;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
 
 
 /**
@@ -17,8 +29,11 @@ import android.view.ViewGroup;
  * Use the {@link ScheduleFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ScheduleFragment extends Fragment {
+public class ScheduleFragment extends Fragment implements CalendarPickerController {
     private OnFragmentInteractionListener mListener;
+    private List<CalendarEvent> eventList = new ArrayList<>();
+    private boolean[][] availableHours = new boolean[24][3];
+    private AgendaCalendarView mAgendaCalendarView;
 
     public ScheduleFragment() {
         // Required empty public constructor
@@ -38,6 +53,38 @@ public class ScheduleFragment extends Fragment {
         return fragment;
     }
 
+    public boolean addEvent(String artistName, String location, Calendar startTime, Calendar endTime) {
+        int day = startTime.get(Calendar.DAY_OF_MONTH) - 5;
+        int startHour = startTime.get(Calendar.HOUR_OF_DAY);
+        int endHour = endTime.get(Calendar.HOUR_OF_DAY);
+
+        boolean taken = false;
+        for (int i = startHour; i <= endHour && !taken; i++) {
+            if (availableHours[i][day]) {
+                taken = true;
+            }
+        }
+
+        if (taken) {
+            return false;
+        }
+
+        for (int i = startHour; i <= endHour; i++) {
+            availableHours[i][day] = true;
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm", Locale.US);
+        String startTimeString = simpleDateFormat.format(startTime.getTime());
+        String endTimeString = simpleDateFormat.format(endTime.getTime());
+
+        BaseCalendarEvent event = new BaseCalendarEvent(artistName, "dummy", location + "\t\t" + startTimeString + " " +
+                "- " + endTimeString, ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime,
+                endTime, false);
+        eventList.add(event);
+
+        return true;
+    }
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -55,7 +102,21 @@ public class ScheduleFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_schedule, container, false);
+        View view = inflater.inflate(R.layout.fragment_schedule, container, false);
+        mAgendaCalendarView = (AgendaCalendarView) view.findViewById(R.id.agenda_calendar_view);
+
+        Calendar minDate = Calendar.getInstance();
+        Calendar maxDate = Calendar.getInstance();
+
+        minDate.set(2016, 8, 5);
+        maxDate.set(2016, 8, 7);
+
+        this.mockList();
+
+        mAgendaCalendarView.init(eventList, minDate, maxDate, Locale.getDefault(), this);
+        mAgendaCalendarView.onStickyHeaderChanged(null, null, 0, 0);
+
+        return view;
     }
 
     @Override
@@ -69,6 +130,38 @@ public class ScheduleFragment extends Fragment {
         if (mListener != null) {
             mListener.onFragmentInteraction(uri);
         }
+    }
+
+    @Override
+    public void onDaySelected(DayItem dayItem) {
+    }
+
+    @Override
+    public void onEventSelected(CalendarEvent event) {
+    }
+
+    @Override
+    public void onScrollToDate(Calendar calendar) {
+    }
+
+    private void mockList() {
+        Calendar startTime1 = Calendar.getInstance();
+        Calendar endTime1 = Calendar.getInstance();
+        startTime1.set(2016, 8, 5, 3, 48);
+        endTime1.set(2016, 8, 5, 12, 15);
+        this.addEvent("Test 1", "Twin Peaks", startTime1, endTime1);
+
+        Calendar startTime2 = Calendar.getInstance();
+        Calendar endTime2 = Calendar.getInstance();
+        startTime2.set(2016, 8, 6, 3, 48);
+        endTime2.set(2016, 8, 6, 12, 15);
+        this.addEvent("Test 2", "Sutro", startTime2, endTime2);
+
+        Calendar startTime3 = Calendar.getInstance();
+        Calendar endTime3 = Calendar.getInstance();
+        startTime3.set(2016, 8, 6, 7, 21);
+        endTime3.set(2016, 8, 6, 8, 15);
+        this.addEvent("Test 3", "SF", startTime3, endTime3);
     }
 
     /**
