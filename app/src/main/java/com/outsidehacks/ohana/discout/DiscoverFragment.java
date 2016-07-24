@@ -120,6 +120,8 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                         });
                     } catch (IOException e) {
                         e.printStackTrace();
+                    } catch (Exception exc){
+                        playButton.setVisibility(View.INVISIBLE);
                     }
                     mp.start();
                     if (Build.VERSION.SDK_INT >= 21){
@@ -137,6 +139,11 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
             EventData event = eventData.get(index);
             titleView.setText(event.getEventName());
             Picasso.with(getActivity()).load(event.getEventImage()).into(eventImage);
+            if (eventData.get(index).getPreviewUrl().isEmpty()){
+                playButton.setVisibility(View.GONE);
+            }else{
+                playButton.setVisibility(View.VISIBLE);
+            }
         }else{
             cardView.setVisibility(View.GONE);
         }
@@ -191,6 +198,12 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                     cardView.setScaleY(0);
                     titleView.setText(eventData.get(index).getEventName());
                     Picasso.with(getActivity()).load(eventData.get(index).getEventImage()).into(eventImage);
+                    if (eventData.get(index).getPreviewUrl().isEmpty()){
+                        playButton.setVisibility(View.GONE);
+                    }else{
+                        playButton.setVisibility(View.VISIBLE);
+                    }
+
                     cardView.animate().scaleY(1f).scaleX(1f).setStartDelay(1000).setInterpolator(new OvershootInterpolator()).setDuration(300).start();
                     yesButton.setClickable(true);
                 }
