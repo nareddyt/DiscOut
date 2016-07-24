@@ -183,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 Log.v("Genres Map", genreMap.toString());
+                Discover discover = new Discover();
+                discover.getEvents();
             }
         });
     }
