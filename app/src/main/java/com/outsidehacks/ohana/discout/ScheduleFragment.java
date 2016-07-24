@@ -13,6 +13,9 @@ import com.github.tibolte.agendacalendarview.CalendarPickerController;
 import com.github.tibolte.agendacalendarview.models.BaseCalendarEvent;
 import com.github.tibolte.agendacalendarview.models.CalendarEvent;
 import com.github.tibolte.agendacalendarview.models.DayItem;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -56,7 +59,7 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
     public boolean addEvent(String artistName, String location, String startTimeString, String endTimeString) {
         int day = Integer.valueOf(startTimeString.substring(0, 1));
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2016, 8, day);
+        calendar.set(2016, 7, day);
         day -= 5;
 
         startTimeString = startTimeString.substring(5);
@@ -91,9 +94,16 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         }
 
         BaseCalendarEvent event = new BaseCalendarEvent(artistName, "dummy", location + "\t\t" + startTimeString + " " +
-                "- " + startTimeString, ContextCompat.getColor(this.getContext(), R.color.colorAccent), calendar,
+                "- " + endTimeString, ContextCompat.getColor(this.getContext(), R.color.colorAccent), calendar,
                 calendar, false);
         eventList.add(event);
+
+        Calendar minDate = Calendar.getInstance();
+        Calendar maxDate = Calendar.getInstance();
+
+        minDate.set(2016, 7, 5);
+        maxDate.set(2016, 7, 7);
+        mAgendaCalendarView.init(eventList, minDate, maxDate, Locale.getDefault(), this);
 
         return true;
     }
@@ -118,17 +128,23 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         View view = inflater.inflate(R.layout.fragment_schedule, container, false);
         mAgendaCalendarView = (AgendaCalendarView) view.findViewById(R.id.agenda_calendar_view);
 
+        EventBus.getDefault().register(this);
+
         Calendar minDate = Calendar.getInstance();
         Calendar maxDate = Calendar.getInstance();
 
-        minDate.set(2016, 8, 5);
-        maxDate.set(2016, 8, 7);
-
-        this.mockList();
+        minDate.set(2016, 7, 5);
+        maxDate.set(2016, 7, 7);
 
         mAgendaCalendarView.init(eventList, minDate, maxDate, Locale.getDefault(), this);
 
         return view;
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventAdded(EventData eventData) {
+        this.addEvent(eventData.getEventName(), eventData.getLocation(), eventData.getStartTime(), eventData
+                .getEndTime());
     }
 
     @Override
@@ -154,14 +170,6 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
 
     @Override
     public void onScrollToDate(Calendar calendar) {
-    }
-
-    private void mockList() {
-        this.addEvent("Test 1", "Twin Peaks", "5 -- 3:13", "5 -- 10:23");
-
-        this.addEvent("Test 2", "Sutro", "6 -- 1:33", "6 -- 4:13");
-
-        this.addEvent("Test 3", "SF", "6 -- 3:23", "6 -- 9:23");
     }
 
     /**

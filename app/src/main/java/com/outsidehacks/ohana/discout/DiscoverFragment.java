@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.spotify.sdk.android.player.Config;
 import com.squareup.picasso.Picasso;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -161,7 +162,10 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
         yesButton.setClickable(false);
         if (id == R.id.yes_button){
 
+            EventData currEvent = eventData.get(index);
             eventData.remove(index);
+
+            EventBus.getDefault().post(currEvent);
 
         }else if( id == R.id.no_button){
             eventData.remove(index);
