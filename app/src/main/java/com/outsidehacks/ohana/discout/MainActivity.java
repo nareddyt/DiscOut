@@ -245,13 +245,17 @@ public class MainActivity extends AppCompatActivity{
 
                 for (Map.Entry<String, Integer> genre : genrePriority) {
                     List<String> artists = artistGenreMap.get(genre.getKey());
-                    for (String artist : artists) {
-                        EventData eventData = eventArtistMap.get(artist);
-                        eventDatasForQueue.add(eventData);
+                    if (artists != null) {
+                        for (String artist : artists) {
+                            EventData eventData = eventArtistMap.get(artist);
+                            if (eventData != null) {
+                                eventDatasForQueue.add(eventData);
+                            }
+                        }
                     }
                 }
 
-
+                Log.v("Event queue", eventDatasForQueue.toString());
             }
         });
     }
