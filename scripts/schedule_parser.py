@@ -35,17 +35,25 @@ def parse_schedule_table(html):
     return table_header, table_body
 
 
+def get_event_img_url(event_page):
+    html = get_html(event_page)
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup.find('div', class_='ds-band-image').find('img')['src']
+
+
 def get_events_from_lineup(location, lineup):
     data = []
     events = lineup.find_all('div', class_='ds-event-box')
     for event in events:
         element = event.find('a', href=True)
-        artist_page = element['href']
+        artist_page = "http://lineup.sfoutsidelands.com{}".format(element['href'])
         artist = element.text.strip()
+        event_url = get_event_img_url(artist_page)
         time = event.find('span', class_='ds-time-range').text.strip().split(sep='-', maxsplit=2)
         data.append({
             'eventName': artist,
-            'eventPage': "http://lineup.sfoutsidelands.com{}".format(artist_page),
+            'eventPage': artist_page,
+            'eventImage': event_url,
             'startTime': time[0].strip(),
             'endTime': time[1].strip(),
             'location': location
@@ -80,12 +88,11 @@ def parse_args():
 def main(args):
     base_url = 'http://lineup.sfoutsidelands.com/events/2016/08/'
     urls = ['05', '06', '07']
-    data = []
     for url in urls:
         html = get_html("{}{}".format(base_url, url))
         locations, lineups = parse_schedule_table(html)
-        data.append(construct_json(locations, lineups))
-    write_json_file(args.name, args.output_dir, data)
+        data = construct_json(locations, lineups)
+        write_json_file("{}{}".format(args.name, url), args.output_dir, data)
 
 if __name__ == "__main__":
     main(parse_args())
