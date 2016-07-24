@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
                                 AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                                         AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
-                                builder.setScopes(new String[]{"user-follow-read"});
+                                builder.setScopes(new String[]{"user-follow-read", "streaming", "user-read-private"});
                                 AuthenticationRequest request = builder.build();
 
                                 AuthenticationClient.openLoginActivity(LoginActivity.this, REQUEST_CODE, request);
