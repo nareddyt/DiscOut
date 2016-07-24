@@ -84,9 +84,6 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
         eventImage = (ImageView) v.findViewById(R.id.event_image);
         cardView = (CardView) v.findViewById(R.id.card_view);
         playButton.setOnClickListener(new View.OnClickListener() {
-
-
-
             @Override
             public void onClick(View view) {
                 if (isPlaying){
@@ -103,6 +100,7 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                     EventData d = eventData.get(index);
 
                     try {
+                        Log.v("Preview url", d.getPreviewUrl());
                         mp.setDataSource(d.getPreviewUrl());
                         mp.prepare();
                         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
