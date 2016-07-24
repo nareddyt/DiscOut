@@ -79,7 +79,6 @@ public class Discover {
             ObjectMapper mapper2 = new ObjectMapper();
             genreMap = mapper2.readValue(jsonText2, Map.class);
             Log.v("Genre Map", genreMap.toString());
-            Log.v("Indie Pop", genreMap.get("indie pop").toString());
 
         } catch (FileNotFoundException | JSONException | JsonMappingException | JsonParseException e) {
             e.printStackTrace();

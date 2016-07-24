@@ -36,6 +36,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -195,13 +196,16 @@ public class MainActivity extends AppCompatActivity{
 
                         for (int j = 0; j < genres.length(); j++) {
                             String genre = genres.getString(j);
-                            Log.v("Genre", genre);
+                            String[] splitGenres = genre.split(" ");
+                            Log.v("Genre", Arrays.toString(splitGenres));
 
-                            Integer genreCount = myGenreMap.get(genre);
-                            if (genreCount == null || genreCount == 0) {
-                                myGenreMap.put(genre, 1);
-                            } else {
-                                myGenreMap.put(genre, 1 + genreCount);
+                            for (String splitGenre : splitGenres) {
+                                Integer genreCount = myGenreMap.get(splitGenre);
+                                if (genreCount == null || genreCount == 0) {
+                                    myGenreMap.put(splitGenre, 1);
+                                } else {
+                                    myGenreMap.put(splitGenre, 1 + genreCount);
+                                }
                             }
                         }
                     }
