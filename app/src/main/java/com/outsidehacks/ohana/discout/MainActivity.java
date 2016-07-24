@@ -43,6 +43,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -238,7 +239,8 @@ public class MainActivity extends AppCompatActivity{
                     if (artists != null) {
                         for (String artist : artists) {
                             EventData eventData = eventArtistMap.get(artist);
-                            if (eventData != null) {
+                            if (eventData != null && !Objects.equals(eventData.getPreviewUrl(), "") && !Objects
+                                    .equals(eventData.getEventImage(), "") && !eventDatasForQueue.contains(eventData)) {
                                 eventDatasForQueue.add(eventData);
                             }
                         }
