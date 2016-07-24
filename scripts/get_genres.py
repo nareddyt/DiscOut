@@ -46,7 +46,7 @@ def get_request(url):
         LOG.info('UnicodeEncodeError for ' +  url)
     except urllib.error.HTTPError:
         LOG.info('HTTPError for ' +  url)
-    time.sleep(0.1)
+    time.sleep(0.05)
     return res
 
 def search_genre(name):
@@ -110,7 +110,7 @@ def main(args):
     for artist, genres in genre_dict.items():
         for genre in genres:
             if genre in inverted_genre_dict:
-                inverted_genre_dict[genre] += artist
+                inverted_genre_dict[genre].append(artist)
             else:
                 inverted_genre_dict[genre] = [artist]
     with open('genres.json', 'w') as f:
