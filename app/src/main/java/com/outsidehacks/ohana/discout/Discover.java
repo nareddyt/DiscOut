@@ -105,21 +105,27 @@ public class Discover {
             JSONArray jsonArray = new JSONArray(jsonTxt);
             Log.v("JSON Array: ", String.valueOf(jsonArray));
             ObjectMapper mapper = new ObjectMapper();
+            Log.v("lenght", String.valueOf(jsonArray.length()));
+            int sum = 0;
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject oneDaySchedule = jsonArray.getJSONObject(i);
                 for (String location : locations) {
                     JSONArray events = oneDaySchedule.getJSONArray(location);
-                    for (int j = 0; j < jsonArray.length(); j++) {
+                    sum += events.length();
+                    for (int j = 0; j < events.length(); j++) {
                         EventData eventData = mapper.readValue(String.valueOf(events.getJSONObject(j)), EventData
                                 .class);
                         eventData.setStartTime((i + 5) + " -- " + eventData.getStartTime());
                         eventData.setEndTime((i + 5) + " -- " + eventData.getEndTime());
                         results.add(eventData);
 
-                        Log.v("event", eventData.toString());
+                        Log.v("abcds", eventData.toString());
                     }
+
                 }
             }
+
+            Log.v("abLL", String.valueOf(sum));
 
             is = res.openRawResource(R.raw.genres);
             String jsonText2 = IOUtils.toString(is);
