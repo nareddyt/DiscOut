@@ -14,20 +14,23 @@ LOG = logging.getLogger(__name__)
 LOCATION_BLACKLIST = ['The House by Heineken', 'The Barbary']
 
 class Event(object):
-    def __init__(self, event_name, event_page, start_time, end_time):
-        self.event_name = event_name
-        self.event_page = event_page
-        self.start_time = start_time
-        self.end_time = end_time
+    def __init__(self, eventName, eventPage, startTime, endTime, location):
+        self.eventName = eventName
+        self.eventPage = eventPage
+        self.startTime = startTime
+        self.endTime = endTime
+        self.location = location
 
     def __str__(self):
-        return "(%s, %s, %s, %s)" % (self.event_name, self.event_page, self.start_time, self.end_time)
+        return "(%s, %s, %s, %s)" % (self.eventName, self.eventPage, self.startTime, self.endTime)
 
-def read_schedule(files):
+def read_schedule(file):
     schedules = []
-    for file in files:
-        with open(file) as data_file:    
-            schedules.append(json.load(data_file))
+    with open(file) as data_file:    
+        return json.load(data_file)
+    # for file in files:
+    #     with open(file) as data_file:    
+    #         schedules.append(json.load(data_file))
     return schedules
 
 def get_request(url):
@@ -97,19 +100,26 @@ def main(args):
     events = [Event(**event) for one_day_schedule in schedules for location in one_day_schedule.keys() if location not in LOCATION_BLACKLIST for event in one_day_schedule[location]]
     genre_dict = {}
     for event in events:
-        LOG.debug('Getting genre for ' + event.event_name)
-        artist = event.event_name
+        LOG.debug('Getting genre for ' + event.eventName)
+        artist = event.eventName
         search_res = search_genre(artist)
         genre = parse_res(artist, search_res)
         genre_dict[artist] = genre
 
+    inverted_genre_dict = {}
+    for artist, genres in genre_dict.items():
+        for genre in genres:
+            if genre in inverted_genre_dict:
+                inverted_genre_dict[genre] += artist
+            else:
+                inverted_genre_dict[genre] = [artist]
     with open('genres.json', 'w') as f:
-        json.dump(genre_dict, f)
+        json.dump(inverted_genre_dict, f)
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Get the genre for each artist in the schedule')
-    parser.add_argument('-i', '--input-names', type=str, nargs='+', help='Input names of the artist information')
+    parser.add_argument('-i', '--input-names', type=str, help='Input names of the artist information')
     return parser.parse_args()
 
 if __name__ == '__main__':
