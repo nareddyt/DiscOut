@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,9 +23,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.spotify.sdk.android.player.Config;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class DiscoverFragment extends Fragment implements View.OnClickListener {
 
@@ -37,7 +40,8 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
     private TextView titleView;
     private CardView cardView;
     private ImageView playButton;
-    private ArrayList<EventData> eventData;
+    private ImageView eventImage;
+    private List<EventData> eventData;
     private int index;
     private MediaPlayer mp;
     public DiscoverFragment() {
@@ -63,7 +67,8 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
 
         super.onCreate(savedInstanceState);
         mp = new MediaPlayer();
-        eventData = new ArrayList<EventData>();
+        eventData = ((MainActivity)getActivity()).getEventDatasForQueue();
+        Log.v("Event stuff", eventData.toString());
     }
 
     @Override
@@ -76,6 +81,8 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
         maybeButton = v.findViewById(R.id.maybe_button);
         titleView = (TextView) v.findViewById(R.id.title);
         playButton = (ImageView) v.findViewById(R.id.play_button);
+        eventImage = (ImageView) v.findViewById(R.id.event_image);
+        cardView = (CardView) v.findViewById(R.id.card_view);
         playButton.setOnClickListener(new View.OnClickListener() {
 
 
@@ -129,11 +136,14 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
             index = 0;
             EventData event = eventData.get(index);
             titleView.setText(event.getEventName());
+            Picasso.with(getActivity()).load(event.getEventImage()).into(eventImage);
+        }else{
+            cardView.setVisibility(View.GONE);
         }
         yesButton.setOnClickListener(this);
         noButton.setOnClickListener(this);
         maybeButton.setOnClickListener(this);
-        cardView = (CardView) v.findViewById(R.id.card_view);
+
 
 
         return v;
@@ -180,6 +190,7 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                     cardView.setScaleX(0);
                     cardView.setScaleY(0);
                     titleView.setText(eventData.get(index).getEventName());
+                    Picasso.with(getActivity()).load(eventData.get(index).getEventImage()).into(eventImage);
                     cardView.animate().scaleY(1f).scaleX(1f).setStartDelay(1000).setInterpolator(new OvershootInterpolator()).setDuration(300).start();
                     yesButton.setClickable(true);
                 }

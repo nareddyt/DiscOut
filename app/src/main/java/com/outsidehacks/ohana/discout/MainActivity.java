@@ -212,11 +212,12 @@ public class MainActivity extends AppCompatActivity{
                 Discover discover = new Discover(context);
 
                 List<EventData> eventList = discover.getEvents();
+
                 Map<String, EventData> eventArtistMap = new HashMap<String, EventData>();
                 for (EventData eventData : eventList) {
                     eventArtistMap.put(eventData.getEventName(), eventData);
                 }
-
+                Log.v("eventArtistMap", eventArtistMap.toString());
                 Map<String, List<String>> artistGenreMap = discover.getGenreMap();
 
                 List<Map.Entry<String, Integer>> genrePriority = new ArrayList<>();
