@@ -57,7 +57,7 @@ def main(args):
     events = [Event(**event) for one_day_schedule in schedules for location in one_day_schedule.keys() if location not in LOCATION_BLACKLIST for event in one_day_schedule[location]]
     genre_dict = {}
     for event in events:
-        LOG.debug('Getting genre for ' + event.eventName)
+        LOG.info('Getting genre for ' + event.eventName)
         artist = event.eventName
         search_res = search_artist(artist)
         genre = get_artist_genre(artist, search_res)
@@ -66,10 +66,11 @@ def main(args):
     inverted_genre_dict = {}
     for artist, genres in genre_dict.items():
         for genre in genres:
-            if genre in inverted_genre_dict:
-                inverted_genre_dict[genre].append(artist)
-            else:
-                inverted_genre_dict[genre] = [artist]
+            for general_genre in genre.split(' '):
+                if general_genre in inverted_genre_dict:
+                    inverted_genre_dict[general_genre].append(artist)
+                else:
+                    inverted_genre_dict[general_genre] = [artist]
     with open('genres.json', 'w') as f:
         json.dump(inverted_genre_dict, f)
 
