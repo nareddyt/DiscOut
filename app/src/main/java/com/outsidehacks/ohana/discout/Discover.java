@@ -4,10 +4,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
 /**
  * Created by jerry on 7/23/16.
  */
@@ -29,7 +37,48 @@ public class Discover {
             , "Twin Peaks", "The House by Heineken"};
     private List<EventData> events;
 
+    private final OkHttpClient client = new OkHttpClient();
+
+    private final JsonParser parser = new JsonParser();
+
+    public void getRequest(String url, String authToken, Callback callback) {
+        final Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + authToken)
+                .build();
+        client.newCall(request).enqueue(callback);
+    }
+
+    public String getRequestSync(String url, String authToken) throws IOException {
+        final Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + authToken)
+                .build();
+        Response response = client.newCall(request).execute();
+        return response.body().string();
+    }
+
+    public List<String> getPlayList(String userId, String authToken) throws IOException {
+        String playListUrl = "https://api.spotify.com/v1/me/playlists";
+        String response = getRequestSync(playListUrl, authToken);
+        JsonObject json = parser.parse(jsonStr).getAsJsonObject();
+        List<String> playListIds = new ArrayList<>();
+        for (JsonElement e: json.get("items").getAsJsonArray()) {
+            String playListId = e.getAsJsonObject().get("snapshot_id").getAsString();
+            playListIds.add(playListId);
+        }
+        return playListIds;
+    }
+
+    public String getUserId(String authToken) throws IOException {
+        String userIdUrl = "https://api.spotify.com/v1/me";
+        String response = getRequestSync(userIdUrl, authToken);
+        JsonObject json = parser.parse(response).getAsJsonObject();
+        return json.get("id").getAsString();
+    }
     public Map<String, List<String>> getGenreMap() {
+
+
         return genreMap;
     }
 
@@ -43,6 +92,12 @@ public class Discover {
 
     public List<EventData> getEvents() {
         return events;
+    }
+
+
+    public Map<String, String> getGenresFromPlayList() {
+        OKHttpClient okHttpClient = new OKHttpClient();
+
     }
 
     public List<EventData> readEvents() {
