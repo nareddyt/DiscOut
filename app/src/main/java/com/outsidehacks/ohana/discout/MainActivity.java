@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -151,19 +152,6 @@ public class MainActivity extends AppCompatActivity{
 
         final Context context = this;
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
-
         this.authToken = this.getIntent().getStringExtra("AUTH_TOKEN");
 
         Log.v("Auth", authToken);
@@ -174,6 +162,8 @@ public class MainActivity extends AppCompatActivity{
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
+            Handler handler = new Handler(context.getMainLooper());
+
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -256,6 +246,25 @@ public class MainActivity extends AppCompatActivity{
                 }
 
                 Log.v("Event queue", eventDatasForQueue.toString());
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Create the adapter that will return a fragment for each of the three
+                        // primary sections of the activity.
+                        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+                        // Set up the ViewPager with the sections adapter.
+                        mViewPager = (ViewPager) findViewById(R.id.container);
+                        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+                        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                        setSupportActionBar(toolbar);
+
+                        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+                        tabLayout.setupWithViewPager(mViewPager);
+                    }
+                });
             }
         });
     }
