@@ -1,9 +1,13 @@
 package com.outsidehacks.ohana.discout;
 
+import android.animation.Animator;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.OvershootInterpolator;
 import android.widget.Button;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -23,20 +27,54 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+
         spotifyButton = (Button) findViewById(R.id.spotify_login_button);
 
         spotifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-                        AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
 
-                builder.setScopes(new String[]{"user-follow-read"});
-                AuthenticationRequest request = builder.build();
+                view.animate().alpha(0f).setDuration(350).setInterpolator(new OvershootInterpolator()).setListener
+                        (new Animator.AnimatorListener() {
+                            @Override
+                            public void onAnimationStart(Animator animator) {
 
-                AuthenticationClient.openLoginActivity(LoginActivity.this, REQUEST_CODE, request);
+                            }
+
+                            @Override
+                            public void onAnimationEnd(Animator animator) {
+                                AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
+                                        AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+
+                                builder.setScopes(new String[]{"user-follow-read"});
+                                AuthenticationRequest request = builder.build();
+
+                                AuthenticationClient.openLoginActivity(LoginActivity.this, REQUEST_CODE, request);
+                            }
+
+                            @Override
+                            public void onAnimationCancel(Animator animator) {
+
+                            }
+
+                            @Override
+                            public void onAnimationRepeat(Animator animator) {
+
+                            }
+                        })
+                        .start();
+
             }
         });
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().addFlags(WindowManager.LayoutParams
+                    .FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            getWindow().setStatusBarColor(getResources().getColor(R.color
+                    .colorPrimaryDark));
+            getWindow().setNavigationBarColor(getResources().getColor(R.color
+                    .colorPrimaryDark));
+        }
     }
 
     @Override
@@ -53,6 +91,8 @@ public class LoginActivity extends AppCompatActivity {
                     Intent mainIntent = new Intent(this, MainActivity.class);
                     mainIntent.putExtra("AUTH_TOKEN", response.getAccessToken());
                     startActivity(mainIntent);
+                    finish();
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                     break;
 
                 // Auth flow returned an error
