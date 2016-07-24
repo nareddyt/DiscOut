@@ -1,7 +1,6 @@
 package com.outsidehacks.ohana.discout;
 
 import android.animation.Animator;
-import android.app.ActivityOptions;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;

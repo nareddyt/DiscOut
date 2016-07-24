@@ -34,4 +34,5 @@ dependencies {
     compile 'com.spotify.sdk:spotify-player:1.0.0-beta13@aar'
     compile 'com.android.support:design:24.0.0'
     compile 'com.squareup.okhttp3:okhttp:3.4.1'
+    compile 'com.android.support:support-v4:24.0.0'
 }
