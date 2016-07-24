@@ -3,23 +3,25 @@ import logging
 import os
 import sys
 import argparse
-import urllib.request
-import time
+from utils import *
 
 FORMAT = '%(asctime)-15s - %(levelname)s - %(module)10s:%(lineno)-5d - %(message)s'
-logging.basicConfig(stream=sys.stdout, level=logging.DEBUG, format=FORMAT)
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=FORMAT)
 LOG = logging.getLogger(__name__)
 
 
 LOCATION_BLACKLIST = ['The House by Heineken', 'The Barbary']
 
 class Event(object):
-    def __init__(self, eventName, eventPage, startTime, endTime, location):
+    def __init__(self, eventName, eventPage, eventImage, eventDate, startTime, endTime, location, previewUrl):
         self.eventName = eventName
         self.eventPage = eventPage
+        self.eventImage = eventImage
+        self.eventDate = eventDate
         self.startTime = startTime
         self.endTime = endTime
         self.location = location
+        self.previewUrl = previewUrl
 
     def __str__(self):
         return "(%s, %s, %s, %s)" % (self.eventName, self.eventPage, self.startTime, self.endTime)
@@ -28,31 +30,7 @@ def read_schedule(file):
     schedules = []
     with open(file) as data_file:    
         return json.load(data_file)
-    # for file in files:
-    #     with open(file) as data_file:    
-    #         schedules.append(json.load(data_file))
     return schedules
-
-def get_request(url):
-    req = urllib.request.Request(url)
-    res = None
-    try:
-        with urllib.request.urlopen(req) as response:
-            if response.code == 200:
-                res = json.loads(response.read().decode('utf-8'))
-            else:
-                LOG.info('Get request failed for' + url + ' response: ' + response.code)
-    except UnicodeEncodeError:
-        LOG.info('UnicodeEncodeError for ' +  url)
-    except urllib.error.HTTPError:
-        LOG.info('HTTPError for ' +  url)
-    time.sleep(0.05)
-    return res
-
-def search_genre(name):
-    search_url = 'https://api.spotify.com/v1/search?type=artist&q='+name.replace(' ', '%20')
-    return get_request(search_url)
-
 
 def get_album_ids(artist_id):
     album_url = 'https://api.spotify.com/v1/artists/{}/albums'.format(artist_id)
@@ -74,27 +52,6 @@ def infer_genre(artist_id):
         genres += get_album_genres(album_id)
     return genres
 
-def parse_res(artist_name, res):
-    if res:
-        items = res['artists']['items']
-        if items:
-            artist = items[0]
-            genres = artist['genres']
-            if genres:
-                return genres
-            # The following code has no effect since 
-            # albumns don't have genre as well
-            # else:
-            #     artist_id = artist['id']
-            #     genre = infer_genre(artist_id)
-            #     if genre:
-            #         return genre
-        else:
-            LOG.debug('No artist on Spotify: ' + artist_name)
-            return []
-    LOG.debug('No genre found for ' + artist_name)
-    return []
-
 def main(args):
     schedules = read_schedule(args.input_names)
     events = [Event(**event) for one_day_schedule in schedules for location in one_day_schedule.keys() if location not in LOCATION_BLACKLIST for event in one_day_schedule[location]]
@@ -102,8 +59,8 @@ def main(args):
     for event in events:
         LOG.debug('Getting genre for ' + event.eventName)
         artist = event.eventName
-        search_res = search_genre(artist)
-        genre = parse_res(artist, search_res)
+        search_res = search_artist(artist)
+        genre = get_artist_genre(artist, search_res)
         genre_dict[artist] = genre
 
     inverted_genre_dict = {}
