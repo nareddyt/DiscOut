@@ -44,8 +44,8 @@ def get_events_from_lineup(lineup):
         artist = element.text.strip()
         time = event.find('span', class_='ds-time-range').text.strip().split(sep='-', maxsplit=2)
         data.append({
-            'artist': artist,
-            'artist_page': "http://lineup.sfoutsidelands.com{}".format(artist_page),
+            'event': artist,
+            'event_page': "http://lineup.sfoutsidelands.com{}".format(artist_page),
             'start_time': time[0].strip(),
             'end_time': time[1].strip()
         })
