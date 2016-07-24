@@ -10,12 +10,12 @@ public class EventData {
     private String endTime;
     private String location;
 
-    public String getEventPage() {
-        return eventPage;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public void setEventPage(String eventPage) {
-        this.eventPage = eventPage;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 
     public String getEventName() {
@@ -26,12 +26,20 @@ public class EventData {
         this.eventName = eventName;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getEventPage() {
+        return eventPage;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setEventPage(String eventPage) {
+        this.eventPage = eventPage;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getStartTime() {
@@ -42,11 +50,14 @@ public class EventData {
         this.startTime = startTime;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
+    @Override
+    public String toString() {
+        return "EventData{" +
+                "eventName='" + eventName + '\'' +
+                ", eventPage='" + eventPage + '\'' +
+                ", startTime='" + startTime + '\'' +
+                ", endTime='" + endTime + '\'' +
+                ", location='" + location + '\'' +
+                '}';
     }
 }

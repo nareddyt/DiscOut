@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.github.tibolte.agendacalendarview.AgendaCalendarView;
 import com.github.tibolte.agendacalendarview.CalendarPickerController;
+import com.github.tibolte.agendacalendarview.models.BaseCalendarEvent;
 import com.github.tibolte.agendacalendarview.models.CalendarEvent;
 import com.github.tibolte.agendacalendarview.models.DayItem;
 
@@ -76,8 +77,9 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         String startTimeString = simpleDateFormat.format(startTime.getTime());
         String endTimeString = simpleDateFormat.format(endTime.getTime());
 
-        Event event = new Event(artistName, "dummy", location + "\t\t" + startTimeString + " - " + endTimeString,
-                ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime, endTime, false);
+        BaseCalendarEvent event = new BaseCalendarEvent(artistName, "dummy", location + "\t\t" + startTimeString + " " +
+                "- " + endTimeString, ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime,
+                endTime, false);
         eventList.add(event);
 
         return true;
@@ -167,7 +169,7 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
