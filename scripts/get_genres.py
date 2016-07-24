@@ -30,55 +30,81 @@ def read_schedule(files):
             schedules.append(json.load(data_file))
     return schedules
 
-def search_genre(name):
-    search_url = 'https://api.spotify.com/v1/search?type=artist&q='+name.replace(' ', '%20')
-    req = urllib.request.Request(search_url)
-    search_res = None
+def get_request(url):
+    req = urllib.request.Request(url)
+    res = None
     try:
         with urllib.request.urlopen(req) as response:
             if response.code == 200:
-                search_res = json.loads(response.read().decode('utf-8'))
+                res = json.loads(response.read().decode('utf-8'))
             else:
-                LOG.info('Search failed for' + search_url + ' response: ' + response.code)
+                LOG.info('Get request failed for' + url + ' response: ' + response.code)
     except UnicodeEncodeError:
-        LOG.info('UnicodeEncodeError for ' +  search_url)
+        LOG.info('UnicodeEncodeError for ' +  url)
     except urllib.error.HTTPError:
-        LOG.info('HTTPError for ' +  search_url)
+        LOG.info('HTTPError for ' +  url)
     time.sleep(0.1)
-    return search_res
+    return res
 
-def parse_res(artist, res):
+def search_genre(name):
+    search_url = 'https://api.spotify.com/v1/search?type=artist&q='+name.replace(' ', '%20')
+    return get_request(search_url)
+
+
+def get_album_ids(artist_id):
+    album_url = 'https://api.spotify.com/v1/artists/{}/albums'.format(artist_id)
+    album_res = get_request(album_url)
+    items = album_res['items'] if album_res else []
+    album_ids = [item['id'] for item in items] if items else []
+    return album_ids
+
+def get_album_genres(album_id):
+    album_genre_url = 'https://api.spotify.com/v1/albums/{}'.format(album_id)
+    album_res = get_request(album_genre_url)
+    album_genre = album_res['genres'] if album_res else []
+    return album_genre    
+
+def infer_genre(artist_id):
+    album_ids = get_album_ids(artist_id)
+    genres = []
+    for album_id in album_ids:
+        genres += get_album_genres(album_id)
+    return genres
+
+def parse_res(artist_name, res):
     if res:
         items = res['artists']['items']
         if items:
-            genres = items[0]['genres']
+            artist = items[0]
+            genres = artist['genres']
             if genres:
                 return genres
-            else:
-                return 'Empty genre'
+            # The following code has no effect since 
+            # albumns don't have genre as well
+            # else:
+            #     artist_id = artist['id']
+            #     genre = infer_genre(artist_id)
+            #     if genre:
+            #         return genre
         else:
-            return 'No artist on Spotify'
-    LOG.debug('No genre found for ' + artist)
-    return 'Search error'
+            LOG.debug('No artist on Spotify: ' + artist_name)
+            return []
+    LOG.debug('No genre found for ' + artist_name)
+    return []
 
 def main(args):
     schedules = read_schedule(args.input_names)
     events = [Event(**event) for one_day_schedule in schedules for location in one_day_schedule.keys() if location not in LOCATION_BLACKLIST for event in one_day_schedule[location]]
     genre_dict = {}
-
     for event in events:
+        LOG.debug('Getting genre for ' + event.event_name)
         artist = event.event_name
         search_res = search_genre(artist)
         genre = parse_res(artist, search_res)
         genre_dict[artist] = genre
 
-    
-
     with open('genres.json', 'w') as f:
         json.dump(genre_dict, f)
-
-
-
 
 
 def parse_args():
