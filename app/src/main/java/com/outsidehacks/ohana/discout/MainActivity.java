@@ -240,8 +240,7 @@ public class MainActivity extends AppCompatActivity{
                     if (artists != null) {
                         for (String artist : artists) {
                             EventData eventData = eventArtistMap.get(artist);
-                            if (eventData != null && !Objects.equals(eventData.getPreviewUrl(), "") && !Objects
-                                    .equals(eventData.getEventImage(), "") && !eventDatasForQueue.contains(eventData)) {
+                            if (eventData != null && !eventDatasForQueue.contains(eventData)) {
                                 eventDatasForQueue.add(eventData);
                             }
                         }
