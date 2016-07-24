@@ -19,13 +19,23 @@ import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.collections4.keyvalue.AbstractMapEntry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,10 +53,9 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-
     private String authToken;
-
-    private Map<String, Integer> genreMap = new HashMap<>();
+    private Map<String, Integer> myGenreMap = new HashMap<>();
+    private List<EventData> eventDatas = new LinkedList<>();
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -173,11 +182,11 @@ public class MainActivity extends AppCompatActivity {
                             String genre = genres.getString(j);
                             Log.v("Genre", genre);
 
-                            Integer genreCount = genreMap.get(genre);
+                            Integer genreCount = myGenreMap.get(genre);
                             if (genreCount == null || genreCount == 0) {
-                                genreMap.put(genre, 1);
+                                myGenreMap.put(genre, 1);
                             } else {
-                                genreMap.put(genre, 1 + genreCount);
+                                myGenreMap.put(genre, 1 + genreCount);
                             }
                         }
                     }
@@ -185,9 +194,25 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                Log.v("Genres Map", genreMap.toString());
+                Log.v("Genres Map", myGenreMap.toString());
                 Discover discover = new Discover(context);
-                discover.getEvents();
+
+                List eventListBefore = discover.getEvents();
+                Map<String, List<String>> artistGenreMap = discover.getGenreMap();
+
+                List<Map.Entry<String, Integer>> genrePriority = new ArrayList<>();
+                for (Map.Entry<String, Integer> entry : myGenreMap.entrySet()) {
+                    genrePriority.add(entry);
+                }
+
+                Collections.sort(genrePriority, new Comparator<Map.Entry<String, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<String, Integer> entry1, Map.Entry<String, Integer> entry2) {
+                        return entry2.getValue().compareTo(entry1.getValue());
+                    }
+                });
+
+                Log.v("Genre Priority List", genrePriority.toString());
             }
         });
     }
