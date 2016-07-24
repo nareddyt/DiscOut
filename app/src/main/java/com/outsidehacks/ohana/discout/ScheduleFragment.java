@@ -10,10 +10,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import com.github.tibolte.agendacalendarview.AgendaCalendarView;
 import com.github.tibolte.agendacalendarview.CalendarPickerController;
-import com.github.tibolte.agendacalendarview.models.BaseCalendarEvent;
 import com.github.tibolte.agendacalendarview.models.CalendarEvent;
 import com.github.tibolte.agendacalendarview.models.DayItem;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -30,6 +30,8 @@ import java.util.Locale;
  */
 public class ScheduleFragment extends Fragment implements CalendarPickerController {
     private OnFragmentInteractionListener mListener;
+    private List<CalendarEvent> eventList = new ArrayList<>();
+    private boolean[][] availableHours = new boolean[24][3];
     private AgendaCalendarView mAgendaCalendarView;
 
     public ScheduleFragment() {
@@ -48,6 +50,37 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public boolean addEvent(String artistName, String location, Calendar startTime, Calendar endTime) {
+        int day = startTime.get(Calendar.DAY_OF_MONTH) - 5;
+        int startHour = startTime.get(Calendar.HOUR_OF_DAY);
+        int endHour = endTime.get(Calendar.HOUR_OF_DAY);
+
+        boolean taken = false;
+        for (int i = startHour; i <= endHour && !taken; i++) {
+            if (availableHours[i][day]) {
+                taken = true;
+            }
+        }
+
+        if (taken) {
+            return false;
+        }
+
+        for (int i = startHour; i <= endHour; i++) {
+            availableHours[i][day] = true;
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm", Locale.US);
+        String startTimeString = simpleDateFormat.format(startTime.getTime());
+        String endTimeString = simpleDateFormat.format(endTime.getTime());
+
+        Event event = new Event(artistName, "dummy", location + "\t\t" + startTimeString + " - " + endTimeString,
+                ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime, endTime, false);
+        eventList.add(event);
+
+        return true;
     }
 
     @Override
@@ -76,44 +109,12 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         minDate.set(2016, 8, 5);
         maxDate.set(2016, 8, 7);
 
-        List<CalendarEvent> eventList = new ArrayList<>();
-        this.mockList(eventList);
+        this.mockList();
 
         mAgendaCalendarView.init(eventList, minDate, maxDate, Locale.getDefault(), this);
         mAgendaCalendarView.onStickyHeaderChanged(null, null, 0, 0);
 
         return view;
-    }
-
-    @Override
-    public void onDaySelected(DayItem dayItem) {
-    }
-
-    @Override
-    public void onScrollToDate(Calendar calendar) {
-    }
-
-    @Override
-    public void onEventSelected(CalendarEvent event) {
-    }
-
-    private void mockList(List<CalendarEvent> eventList) {
-        Calendar startTime1 = Calendar.getInstance();
-        Calendar endTime1 = Calendar.getInstance();
-        startTime1.set(2016, 8, 5, 3, 48);
-        endTime1.set(2016, 8, 5, 12, 15);
-        BaseCalendarEvent event1 = new BaseCalendarEvent("Thibault travels in Iceland", "A wonderful journey!",
-                "Iceland", ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime1, endTime1,
-                true);
-        eventList.add(event1);
-
-        Calendar startTime2 = Calendar.getInstance();
-        Calendar endTime2 = Calendar.getInstance();
-        startTime2.set(2016, 8, 6, 3, 48);
-        endTime2.set(2016, 8, 7, 12, 15);
-        BaseCalendarEvent event2 = new BaseCalendarEvent("Visit to Dalvík", "A beautiful small town", "Dalvík",
-                ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime2, endTime2, true);
-        eventList.add(event2);
     }
 
     @Override
@@ -129,12 +130,44 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         }
     }
 
+    @Override
+    public void onDaySelected(DayItem dayItem) {
+    }
+
+    @Override
+    public void onEventSelected(CalendarEvent event) {
+    }
+
+    @Override
+    public void onScrollToDate(Calendar calendar) {
+    }
+
+    private void mockList() {
+        Calendar startTime1 = Calendar.getInstance();
+        Calendar endTime1 = Calendar.getInstance();
+        startTime1.set(2016, 8, 5, 3, 48);
+        endTime1.set(2016, 8, 5, 12, 15);
+        this.addEvent("Test 1", "Twin Peaks", startTime1, endTime1);
+
+        Calendar startTime2 = Calendar.getInstance();
+        Calendar endTime2 = Calendar.getInstance();
+        startTime2.set(2016, 8, 6, 3, 48);
+        endTime2.set(2016, 8, 6, 12, 15);
+        this.addEvent("Test 2", "Sutro", startTime2, endTime2);
+
+        Calendar startTime3 = Calendar.getInstance();
+        Calendar endTime3 = Calendar.getInstance();
+        startTime3.set(2016, 8, 6, 7, 21);
+        endTime3.set(2016, 8, 6, 8, 15);
+        this.addEvent("Test 3", "SF", startTime3, endTime3);
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
+     * <p>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
