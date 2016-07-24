@@ -53,10 +53,27 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         return fragment;
     }
 
-    public boolean addEvent(String artistName, String location, Calendar startTime, Calendar endTime) {
-        int day = startTime.get(Calendar.DAY_OF_MONTH) - 5;
-        int startHour = startTime.get(Calendar.HOUR_OF_DAY);
-        int endHour = endTime.get(Calendar.HOUR_OF_DAY);
+    public boolean addEvent(String artistName, String location, String startTimeString, String endTimeString) {
+        int day = Integer.valueOf(startTimeString.substring(0, 1));
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2016, 8, day);
+        day -= 5;
+
+        startTimeString = startTimeString.substring(5);
+        int startHour;
+        if (startTimeString.charAt(1) == ':') {
+            startHour = Integer.valueOf(startTimeString.substring(0, 1));
+        } else {
+            startHour = Integer.valueOf(startTimeString.substring(0, 2));
+        }
+
+        endTimeString = endTimeString.substring(5);
+        int endHour;
+        if (endTimeString.charAt(1) == ':') {
+            endHour = Integer.valueOf(endTimeString.substring(0, 1));
+        } else {
+            endHour = Integer.valueOf(endTimeString.substring(0, 2));
+        }
 
         boolean taken = false;
         for (int i = startHour; i <= endHour && !taken; i++) {
@@ -73,13 +90,9 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
             availableHours[i][day] = true;
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm", Locale.US);
-        String startTimeString = simpleDateFormat.format(startTime.getTime());
-        String endTimeString = simpleDateFormat.format(endTime.getTime());
-
         BaseCalendarEvent event = new BaseCalendarEvent(artistName, "dummy", location + "\t\t" + startTimeString + " " +
-                "- " + endTimeString, ContextCompat.getColor(this.getContext(), R.color.colorAccent), startTime,
-                endTime, false);
+                "- " + startTimeString, ContextCompat.getColor(this.getContext(), R.color.colorAccent), calendar,
+                calendar, false);
         eventList.add(event);
 
         return true;
@@ -114,7 +127,6 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
         this.mockList();
 
         mAgendaCalendarView.init(eventList, minDate, maxDate, Locale.getDefault(), this);
-        mAgendaCalendarView.onStickyHeaderChanged(null, null, 0, 0);
 
         return view;
     }
@@ -145,23 +157,11 @@ public class ScheduleFragment extends Fragment implements CalendarPickerControll
     }
 
     private void mockList() {
-        Calendar startTime1 = Calendar.getInstance();
-        Calendar endTime1 = Calendar.getInstance();
-        startTime1.set(2016, 8, 5, 3, 48);
-        endTime1.set(2016, 8, 5, 12, 15);
-        this.addEvent("Test 1", "Twin Peaks", startTime1, endTime1);
+        this.addEvent("Test 1", "Twin Peaks", "5 -- 3:13", "5 -- 10:23");
 
-        Calendar startTime2 = Calendar.getInstance();
-        Calendar endTime2 = Calendar.getInstance();
-        startTime2.set(2016, 8, 6, 3, 48);
-        endTime2.set(2016, 8, 6, 12, 15);
-        this.addEvent("Test 2", "Sutro", startTime2, endTime2);
+        this.addEvent("Test 2", "Sutro", "6 -- 1:33", "6 -- 4:13");
 
-        Calendar startTime3 = Calendar.getInstance();
-        Calendar endTime3 = Calendar.getInstance();
-        startTime3.set(2016, 8, 6, 7, 21);
-        endTime3.set(2016, 8, 6, 8, 15);
-        this.addEvent("Test 3", "SF", startTime3, endTime3);
+        this.addEvent("Test 3", "SF", "6 -- 3:23", "6 -- 9:23");
     }
 
     /**

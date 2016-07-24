@@ -2,7 +2,10 @@ package com.outsidehacks.ohana.discout;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,20 +17,41 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import com.spotify.sdk.android.authentication.AuthenticationClient;
+import com.spotify.sdk.android.player.Config;
+import com.spotify.sdk.android.player.ConnectionStateCallback;
+import com.spotify.sdk.android.player.Player;
+import com.spotify.sdk.android.player.PlayerNotificationCallback;
+import com.spotify.sdk.android.player.PlayerState;
+import com.spotify.sdk.android.player.Spotify;
+
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.apache.commons.collections4.keyvalue.AbstractMapEntry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
+
+    private static final String CLIENT_ID = "6c6016da831348e18df08257e074c9c4";
+
 
     private final OkHttpClient client = new OkHttpClient();
     /**
@@ -43,10 +67,15 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
-
     private String authToken;
+    private Map<String, Integer> myGenreMap = new HashMap<>();
 
-    private Map<String, Integer> genreMap = new HashMap<>();
+    public List<EventData> getEventDatasForQueue() {
+        return eventDatasForQueue;
+    }
+
+    private List<EventData> eventDatasForQueue = new ArrayList<EventData>();
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -73,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -104,11 +134,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             if (position == 0) {
-                return DiscoverFragment.newInstance();
+                Bundle args = new Bundle();
+                args.putString("token", getIntent().getStringExtra("AUTH_TOKEN"));
+                DiscoverFragment fragment = DiscoverFragment.newInstance();
+                fragment.setArguments(args);
+                return fragment;
             } else {
                 return ScheduleFragment.newInstance();
             }
         }
+
     }
 
     @Override
@@ -117,19 +152,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         final Context context = this;
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
 
         this.authToken = this.getIntent().getStringExtra("AUTH_TOKEN");
 
@@ -141,6 +163,8 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         client.newCall(request).enqueue(new Callback() {
+            Handler handler = new Handler(context.getMainLooper());
+
             @Override
             public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
@@ -173,11 +197,11 @@ public class MainActivity extends AppCompatActivity {
                             String genre = genres.getString(j);
                             Log.v("Genre", genre);
 
-                            Integer genreCount = genreMap.get(genre);
+                            Integer genreCount = myGenreMap.get(genre);
                             if (genreCount == null || genreCount == 0) {
-                                genreMap.put(genre, 1);
+                                myGenreMap.put(genre, 1);
                             } else {
-                                genreMap.put(genre, 1 + genreCount);
+                                myGenreMap.put(genre, 1 + genreCount);
                             }
                         }
                     }
@@ -185,9 +209,64 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                Log.v("Genres Map", genreMap.toString());
+                Log.v("Genres Map", myGenreMap.toString());
                 Discover discover = new Discover(context);
-                discover.getEvents();
+
+                List<EventData> eventList = discover.getEvents();
+
+                Map<String, EventData> eventArtistMap = new HashMap<String, EventData>();
+                for (EventData eventData : eventList) {
+                    eventArtistMap.put(eventData.getEventName(), eventData);
+                }
+                Log.v("eventArtistMap", eventArtistMap.toString());
+                Map<String, List<String>> artistGenreMap = discover.getGenreMap();
+
+                List<Map.Entry<String, Integer>> genrePriority = new ArrayList<>();
+                for (Map.Entry<String, Integer> entry : myGenreMap.entrySet()) {
+                    genrePriority.add(entry);
+                }
+
+                Collections.sort(genrePriority, new Comparator<Map.Entry<String, Integer>>() {
+                    @Override
+                    public int compare(Map.Entry<String, Integer> entry1, Map.Entry<String, Integer> entry2) {
+                        return entry2.getValue().compareTo(entry1.getValue());
+                    }
+                });
+
+                Log.v("Genre Priority List", genrePriority.toString());
+
+                for (Map.Entry<String, Integer> genre : genrePriority) {
+                    List<String> artists = artistGenreMap.get(genre.getKey());
+                    if (artists != null) {
+                        for (String artist : artists) {
+                            EventData eventData = eventArtistMap.get(artist);
+                            if (eventData != null && !eventDatasForQueue.contains(eventData)) {
+                                eventDatasForQueue.add(eventData);
+                            }
+                        }
+                    }
+                }
+
+                Log.v("Event queue", eventDatasForQueue.toString());
+
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Create the adapter that will return a fragment for each of the three
+                        // primary sections of the activity.
+                        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+                        // Set up the ViewPager with the sections adapter.
+                        mViewPager = (ViewPager) findViewById(R.id.container);
+                        mViewPager.setAdapter(mSectionsPagerAdapter);
+
+                        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                        setSupportActionBar(toolbar);
+
+                        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+                        tabLayout.setupWithViewPager(mViewPager);
+                    }
+                });
             }
         });
     }
