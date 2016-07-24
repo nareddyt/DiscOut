@@ -64,11 +64,6 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         mp = new MediaPlayer();
         eventData = new ArrayList<EventData>();
-        eventData.add(new EventData("Cool stuff", "Idk", "2pm","5pm", "Cool street", "http://d318706lgtcm8e.cloudfront.net/mp3-preview/f454c8224828e21fa146af84916fd22cb89cedc6"));
-        eventData.add(new EventData("Cool stuffeee", "Idk", "2pm","5pm", "Cool street", "https://p.scdn.co/mp3-preview/12b8cee72118f995f5494e1b34251e4ac997445e"));
-        eventData.add(new EventData("Cool stuffs", "Idk", "2pm","5pm", "Cool street", "http://d318706lgtcm8e.cloudfront.net/mp3-preview/f454c8224828e21fa146af84916fd22cb89cedc6"));
-        eventData.add(new EventData("Cool stuff dude", "Idk", "2pm","5pm", "Cool street", "http://d318706lgtcm8e.cloudfront.net/mp3-preview/f454c8224828e21fa146af84916fd22cb89cedc6"));
-        eventData.add(new EventData("Cool stuff :D", "Idk", "2pm","5pm", "Cool street", "http://d318706lgtcm8e.cloudfront.net/mp3-preview/f454c8224828e21fa146af84916fd22cb89cedc6"));
     }
 
     @Override

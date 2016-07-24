@@ -67,8 +67,12 @@ public class MainActivity extends AppCompatActivity{
     private ViewPager mViewPager;
     private String authToken;
     private Map<String, Integer> myGenreMap = new HashMap<>();
-    private List<EventData> eventDatas = new LinkedList<>();
 
+    public List<EventData> getEventDatasForQueue() {
+        return eventDatasForQueue;
+    }
+
+    private List<EventData> eventDatasForQueue = new ArrayList<EventData>();
 
 
     @Override
@@ -217,7 +221,12 @@ public class MainActivity extends AppCompatActivity{
                 Log.v("Genres Map", myGenreMap.toString());
                 Discover discover = new Discover(context);
 
-                List eventListBefore = discover.getEvents();
+                List<EventData> eventList = discover.getEvents();
+                Map<String, EventData> eventArtistMap = new HashMap<String, EventData>();
+                for (EventData eventData : eventList) {
+                    eventArtistMap.put(eventData.getEventName(), eventData);
+                }
+
                 Map<String, List<String>> artistGenreMap = discover.getGenreMap();
 
                 List<Map.Entry<String, Integer>> genrePriority = new ArrayList<>();
@@ -233,6 +242,16 @@ public class MainActivity extends AppCompatActivity{
                 });
 
                 Log.v("Genre Priority List", genrePriority.toString());
+
+                for (Map.Entry<String, Integer> genre : genrePriority) {
+                    List<String> artists = artistGenreMap.get(genre.getKey());
+                    for (String artist : artists) {
+                        EventData eventData = eventArtistMap.get(artist);
+                        eventDatasForQueue.add(eventData);
+                    }
+                }
+
+
             }
         });
     }
