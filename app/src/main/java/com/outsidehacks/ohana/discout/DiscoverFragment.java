@@ -103,6 +103,19 @@ public class DiscoverFragment extends Fragment implements View.OnClickListener {
                     try {
                         mp.setDataSource(d.getPreviewUrl());
                         mp.prepare();
+                        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mediaPlayer) {
+                                mediaPlayer.stop();
+                                mediaPlayer.reset();
+                                isPlaying = false;
+                                if (Build.VERSION.SDK_INT >= 21){
+                                    playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp, null));
+                                }else{
+                                    playButton.setImageDrawable(getResources().getDrawable(R.drawable.ic_play_arrow_black_24dp));
+                                }
+                            }
+                        });
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
